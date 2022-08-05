@@ -103,65 +103,68 @@ export default {
                     console.log(md5);
                 }
                 reader.readAsBinaryString(file)
-                // if (size > 10485760) {
-                //     for (let i = Math.ceil(size / 10485760); i--; i > 0) {
-                //         // reader.readAsText(file.slice(prevSize, prevSize + 5));
-                //         this.lazyLoad.push(file.slice(prevSize, prevSize + 10485760))
-                //         prevSize += 10485760;
-                //         // console.log(prevSize);
-                //     }
-                // }
 
-                // this.lazyLoad.forEach((blob, indexBlob) => {
-
-                //      const formData = new FormData();
-                //     formData.append(`${file.name}-${indexBlob}`, blob);
-                //     formData.append('filename', file.name)
-                //     axios.put(`${this.API}/files`,
-                //         formData,
-                //         {
-                //             headers: {
-                //                 'Content-Type': 'multipart/form-data',
-                //                 'Content-Range': `bytes ${indexBlob}-${blob.size}/${size}`,
-                //                 'Authorization': 'Token dcd0d5a14f0052c5cb762375a397661df78ed51c'
-                //             },
-                //             data: '[formData]'
-                //             // onUploadProgress: function (progressEvent) {
-                //             //     let uploadPercentage = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))
-                //             // }.bind(this)
-                //         },
-                //     ).then(function () {
-                //         console.log('SUCCESS!!');
-                //     })
-                //         .catch((responce) => {
-                //             console.log('FAILURE!!!', responce.response);
-                //         })
-                // })
+                if (size > 10485760) {
+                    for (let i = Math.ceil(size / 10485760); i--; i > 0) {
+                        // reader.readAsText(file.slice(prevSize, prevSize + 5));
+                        this.lazyLoad.push(file.slice(prevSize, prevSize + 10485760))
+                        prevSize += 10485760;
+                        // console.log(prevSize);
+                    }
+                }
+                
+                this.lazyLoad.forEach((blob, indexBlob) => {
+                    const form = new FormData();
+                    // const blobName = `${indexBlob}file`
+                    // console.log(`${indexBlob}file`);
+                    form.append('file', blob);
+                    form.append('filename', file.name);
+                    // for (let [name, value] of form) {
+                    //     console.log(name, value);
+                    // }
+                    const options = {
+                        method: 'PUT',
+                        url: 'https://logs.scriptscamp.space/files',
+                        headers: {
+                            // 'Content-disposition': 'form-data',
+                            'Content-Type': 'multipart/form-data; boundary=---011000010111000001101001',
+                            'Authorization': 'Token dcd0d5a14f0052c5cb762375a397661df78ed51c',
+                            'Content-Range': `bytes ${indexBlob}-${blob.size}/${size}`,
+                        },
+                        data: form
+                    };
+                    axios.request(options).then(function (response) {
+                        console.log(response.data);
+                    }).catch(function (error) {
+                        console.error(error);
+                    });
+                    //      const formData = new FormData();
+                    //     formData.append(`${file.name}-${indexBlob}`, blob);
+                    //     formData.append('filename', file.name)
+                    //     axios.put(`${this.API}/files`,
+                    //         formData,
+                    //         {
+                    //             headers: {
+                    //                 'Content-Type': 'multipart/form-data',
+                    //                 'Content-Range': `bytes ${indexBlob}-${blob.size}/${size}`,
+                    //                 'Authorization': 'Token dcd0d5a14f0052c5cb762375a397661df78ed51c'
+                    //             },
+                    //             data: '[formData]'
+                    //             // onUploadProgress: function (progressEvent) {
+                    //             //     let uploadPercentage = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))
+                    //             // }.bind(this)
+                    //         },
+                    //     ).then(function () {
+                    //         console.log('SUCCESS!!');
+                    //     })
+                    //         .catch((responce) => {
+                    //             console.log('FAILURE!!!', responce.response);
+                    //         })
+                })
 
             })
 
-            const form = new FormData();
-            form.append("file", this.files[0]);
-            form.append("filename", this.files.name);
-            form.append("md5", "fb047bd847a60c840ee15cf8c57df1e9");
-            // for (let [name, value] of form) {
-            //     console.log(name, value);
-            // }
-            const options = {
-                method: 'POST',
-                url: 'https://logs.scriptscamp.space/files',
-                headers: {
-                    // 'Content-disposition': 'form-data',
-                    'Content-Type': 'multipart/form-data; boundary=---011000010111000001101001',
-                    'Authorization': 'Token dcd0d5a14f0052c5cb762375a397661df78ed51c'
-                },
-                data: form
-            };
-            axios.request(options).then(function (response) {
-                console.log(response.data);
-            }).catch(function (error) {
-                console.error(error);
-            });
+
         },
         upload() {
             this.load = false
