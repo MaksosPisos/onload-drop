@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    .button {
+      @apply bg-slate-800 p-4  text-white font-bold rounded-md hover:opacity-70 transition-opacity active:opacity-100 uppercase tracking-wide font-bold;
+    }
+    .button.submit {
+        @apply bg-teal-600
+    }
+}
+
+.btn-enter-active, .btn-leave-active {
+  /* background-color: #0d9488; */
+  transition: all .5s;
+}
+.btn-enter, .btn-leave-to {
+  transform: translateX(-120px);
+  background-color: #1e293b !important;
+}
+
+.toast-leave-active, .toast-enter-active, .toast-leave-active  {
+  transform: translateY(-10px);
+  transition: all 1s;
+}
+.toast-enter, .toast-enter-from,  .toast-leave-to {
+  opacity: 0;
+  transform: scale(0.1);
+  transform: translateY(40px);
+}
+.toast-move {
+  transition: transform 1s;
+}
+
+.files-leave-active, .files-enter-active, .files-leave-active  {
+  transition: all 1s;
+}
+.files-enter, .files-enter-from,  .files-leave-to {
+  opacity: 0;
+  transform: scale(0.1);
+  /* transform: translateY(40px); */
+}
+.files-move {
+  transition: transform .5s;
+}
+/* .files-move, 
+.files-enter-active,
+.files-leave-active {
+  transition: all 0.5s ease;
+}
+
+.files-enter-from,
+.files-leave-to {
+  opacity: 0;
+  transform: translateX(300px);
+} */
+
+
+/* .files-leave-active {
+  position: absolute;
+} */
+
+.progress-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  top: calc(50% - 13px);
+  left: calc(50% - 13px);
+}
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.18s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
