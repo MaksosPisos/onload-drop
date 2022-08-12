@@ -89,12 +89,11 @@ export default {
         },
     },
     methods: {
-        submit() {
-            // const API = import.meta.env.VITE_API_URL
+        async submit() {
+            let URL = this.API + '/files'
             this.disabledSubmit = true;
-            console.log('submit');
             this.load = true;
-            this.files.forEach((file, index) => {
+            this.files.forEach(async (file, index) => {
                 let size = file.size;
                 let prevSize = 0;
                 let reader = new FileReader();
@@ -104,67 +103,72 @@ export default {
                 }
                 reader.readAsBinaryString(file)
 
-                if (size > 10485760) {
-                    for (let i = Math.ceil(size / 10485760); i--; i > 0) {
+                if (size > 1048576) {
+                    for (let i = Math.ceil(size / 1048576); i--; i > 0) {
                         // reader.readAsText(file.slice(prevSize, prevSize + 5));
-                        this.lazyLoad.push(file.slice(prevSize, prevSize + 10485760))
-                        prevSize += 10485760;
+                        this.lazyLoad.push(file.slice(prevSize, prevSize + 1048576))
+                        prevSize += 1048576;
                         // console.log(prevSize);
                     }
                 }
-                
-                this.lazyLoad.forEach((blob, indexBlob) => {
+                let start = 0;
+                let end = 0;
+                let options;
+                for( const blob of this.lazyLoad){
+                    end = start + blob.size
                     const form = new FormData();
-                    // const blobName = `${indexBlob}file`
-                    // console.log(`${indexBlob}file`);
                     form.append('file', blob);
                     form.append('filename', file.name);
-                    // for (let [name, value] of form) {
-                    //     console.log(name, value);
-                    // }
-                    const options = {
+                    options = {
                         method: 'PUT',
-                        url: 'https://logs.scriptscamp.space/files',
+                        url: URL,
                         headers: {
                             // 'Content-disposition': 'form-data',
-                            'Content-Type': 'multipart/form-data; boundary=---011000010111000001101001',
+                            // 'Content-Type': 'multipart/form-data; boundary=---011000010111000001101001',
                             'Authorization': 'Token dcd0d5a14f0052c5cb762375a397661df78ed51c',
-                            'Content-Range': `bytes ${indexBlob}-${blob.size}/${size}`,
+                            'Content-Range': `bytes ${start}-${end - 1}/${size}`,
                         },
                         data: form
                     };
-                    axios.request(options).then(function (response) {
-                        console.log(response.data);
-                    }).catch(function (error) {
-                        console.error(error);
-                    });
-                    //      const formData = new FormData();
-                    //     formData.append(`${file.name}-${indexBlob}`, blob);
-                    //     formData.append('filename', file.name)
-                    //     axios.put(`${this.API}/files`,
-                    //         formData,
-                    //         {
-                    //             headers: {
-                    //                 'Content-Type': 'multipart/form-data',
-                    //                 'Content-Range': `bytes ${indexBlob}-${blob.size}/${size}`,
-                    //                 'Authorization': 'Token dcd0d5a14f0052c5cb762375a397661df78ed51c'
-                    //             },
-                    //             data: '[formData]'
-                    //             // onUploadProgress: function (progressEvent) {
-                    //             //     let uploadPercentage = parseInt(Math.round((progressEvent.loaded / progressEvent.total) * 100))
-                    //             // }.bind(this)
-                    //         },
-                    //     ).then(function () {
-                    //         console.log('SUCCESS!!');
-                    //     })
-                    //         .catch((responce) => {
-                    //             console.log('FAILURE!!!', responce.response);
-                    //         })
-                })
-
+                    start = end;
+                    console.log(URL);
+                    await axios.request(options)
+                        .then(function (response) {
+                            URL = response.data.url
+                            console.log(response.data);
+                        }).catch(function (error) {
+                            console.error(error);
+                        });
+                    console.log(URL);
+                }
+                // this.lazyLoad.forEach(async (blob, indexBlob) => {
+                    // end = start + blob.size
+                    // const form = new FormData();
+                    // form.append('file', blob);
+                    // form.append('filename', file.name);
+                    // options = {
+                    //     method: 'PUT',
+                    //     url: URL,
+                    //     headers: {
+                    //         // 'Content-disposition': 'form-data',
+                    //         // 'Content-Type': 'multipart/form-data; boundary=---011000010111000001101001',
+                    //         'Authorization': 'Token dcd0d5a14f0052c5cb762375a397661df78ed51c',
+                    //         'Content-Range': `bytes ${start}-${end - 1}/${size}`,
+                    //     },
+                    //     data: form
+                    // };
+                    // start = end;
+                    // console.log(URL, indexBlob);
+                    // await axios.request(options)
+                    //     .then(function (response) {
+                    //         URL = response.data.url
+                    //         console.log(response.data, indexBlob);
+                    //     }).catch(function (error) {
+                    //         console.error(error);
+                    //     });
+                    // console.log(URL, indexBlob);
+                // })
             })
-
-
         },
         upload() {
             this.load = false
