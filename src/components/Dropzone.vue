@@ -91,6 +91,8 @@ export default {
     methods: {
         async submit() {
             let URL = this.API + '/files'
+            let successRequest = false;
+            let md5;
             this.disabledSubmit = true;
             this.load = true;
             this.files.forEach(async (file, index) => {
@@ -98,7 +100,7 @@ export default {
                 let prevSize = 0;
                 let reader = new FileReader();
                 reader.onload = ev => {
-                    let md5 = this.$CryptoJS.MD5(ev.target.result).toString();
+                    md5 = this.$CryptoJS.MD5(ev.target.result).toString();
                     console.log(md5);
                 }
                 reader.readAsBinaryString(file)
@@ -113,13 +115,13 @@ export default {
                 }
                 let start = 0;
                 let end = 0;
-                let options;
-                for( const blob of this.lazyLoad){
+                for (const blob of this.lazyLoad) {
+
                     end = start + blob.size
                     const form = new FormData();
                     form.append('file', blob);
                     form.append('filename', file.name);
-                    options = {
+                    const options = {
                         method: 'PUT',
                         url: URL,
                         headers: {
@@ -136,38 +138,35 @@ export default {
                         .then(function (response) {
                             URL = response.data.url
                             console.log(response.data);
+                            if (response.data.offset === size) {
+                                successRequest = true;
+                            }
                         }).catch(function (error) {
                             console.error(error);
                         });
                     console.log(URL);
                 }
-                // this.lazyLoad.forEach(async (blob, indexBlob) => {
-                    // end = start + blob.size
-                    // const form = new FormData();
-                    // form.append('file', blob);
-                    // form.append('filename', file.name);
-                    // options = {
-                    //     method: 'PUT',
-                    //     url: URL,
-                    //     headers: {
-                    //         // 'Content-disposition': 'form-data',
-                    //         // 'Content-Type': 'multipart/form-data; boundary=---011000010111000001101001',
-                    //         'Authorization': 'Token dcd0d5a14f0052c5cb762375a397661df78ed51c',
-                    //         'Content-Range': `bytes ${start}-${end - 1}/${size}`,
-                    //     },
-                    //     data: form
-                    // };
-                    // start = end;
-                    // console.log(URL, indexBlob);
-                    // await axios.request(options)
-                    //     .then(function (response) {
-                    //         URL = response.data.url
-                    //         console.log(response.data, indexBlob);
-                    //     }).catch(function (error) {
-                    //         console.error(error);
-                    //     });
-                    // console.log(URL, indexBlob);
-                // })
+                if (successRequest) {
+                    console.log(md5);
+                    const options = {
+                        method: 'POST',
+                        url: URL,
+                        headers: {
+                            // 'Content-disposition': 'form-data',
+                            // 'Content-Type': 'multipart/form-data; boundary=---011000010111000001101001',
+                            'Authorization': 'Token dcd0d5a14f0052c5cb762375a397661df78ed51c',
+                        },
+                        data: JSON.stringify(md5) 
+                    }
+                    axios.request(options)
+                    .then(function (response){
+                        console.log(response.data);
+                    })
+                    .catch(function (error){
+                        console.log(error);
+                    })
+                }
+
             })
         },
         upload() {
@@ -181,19 +180,8 @@ export default {
             if (!e.target.files) {
                 return
             }
-            const filesinput = this.$refs.file
-            // console.log(filesinput.files[0]);
-            const newForm = new FormData()
-            newForm.append('key', filesinput.files[0]);
-
-            for (let [name, value] of newForm) {
-                console.log(name, value);
-            }
             this.files = Array.from(e.target.files)
             this.showPreview = true;
-            this.files.forEach(file => {
-                // console.log(file);
-            })
         },
         convert(byte) {
             const KB = 1024;
